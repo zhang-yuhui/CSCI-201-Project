@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Filter, X } from "lucide-react";
+import MapWithMarker from './MapWithMarker';
 
 const mapContainerStyle = {
   width: "100%",
@@ -140,9 +141,6 @@ const CafeMap = () => {
 
       {/* Map with Filter Overlay */}
       <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
-        <div style={mapContainerStyle}>
-          Map Placeholder
-        </div>
 
         {/* Collapsible Filter Panel */}
         {showFilters && (
@@ -306,6 +304,9 @@ const CafeMap = () => {
             </div>
           </div>
         )}
+        <div style={mapContainerStyle}>
+          <MapWithMarker />
+        </div>
       </div>
     </div>
   );
