@@ -1,29 +1,36 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import CafeMap from './components/CafeMap';   // <-- CORRECT IMPORT
 import './App.css';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/map" element={<CafeMap />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
+
+// <Router>
+    //   <Routes>
+    //     <Route path="/login" element={<Login />} />
+    //     <Route path="/register" element={<Register />} />
+    //     <Route
+    //       path="/dashboard"
+    //       element={
+    //         <ProtectedRoute>
+    //           <Dashboard />
+    //         </ProtectedRoute>
+    //       }
+    //     />
+    //     <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    //   </Routes>
+    // </Router>

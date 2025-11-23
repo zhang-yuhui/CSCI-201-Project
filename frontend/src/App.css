@@ -36,3 +36,15 @@
     transform: rotate(360deg);
   }
 }
+
+body {
+  background-color: #6F4E37;
+  margin: 0;
+  font-family: sans-serif;
+}
+
+h1 {
+  color: white;
+  padding-left: 16px;
+  font-size: 20px;
+}
