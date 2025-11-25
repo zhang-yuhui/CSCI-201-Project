@@ -28,6 +28,18 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+  const testPublicEndpoint = async () => {
+    setLoading(true);
+    setMessage('');
+    try {
+      const response = await axios.get('http://localhost:8080/api/test/public');
+      setMessage(response.data);
+    } catch (error) {
+      setMessage('Error: ' + (error.response?.data?.message || 'Failed to access public endpoint'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -39,6 +51,9 @@ const Dashboard = () => {
         <div style={styles.buttonGroup}>
           <button onClick={testProtectedEndpoint} disabled={loading} style={styles.button}>
             {loading ? 'Testing...' : 'Test Protected Endpoint'}
+          </button>
+          <button onClick={testPublicEndpoint} disabled={loading} style={styles.button}>
+            {loading ? 'Testing...' : 'Test Public Endpoint'}
           </button>
           <button onClick={handleLogout} style={styles.logoutButton}>
             Logout

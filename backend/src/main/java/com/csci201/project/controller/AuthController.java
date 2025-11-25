@@ -16,6 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/auth")
@@ -35,12 +38,18 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        Map<String, String> errors = new HashMap<>();
+
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+            errors.put("username", "Username is already taken!");
         }
 
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+            errors.put("email", "Email is already in use!");
+        }
+
+        if (!errors.isEmpty()) {
+            return ResponseEntity.badRequest().body(errors);
         }
 
         User user = new User(
@@ -51,7 +60,9 @@ public class AuthController {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully!");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "User registered successfully!");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
@@ -69,7 +80,9 @@ public class AuthController {
 
             return ResponseEntity.ok(new JwtResponse(jwt, loginRequest.getUsername()));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error: Invalid username or password!");
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Invalid username or password!");
+            return ResponseEntity.badRequest().body(error);
         }
     }
 

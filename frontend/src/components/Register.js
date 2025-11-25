@@ -6,14 +6,14 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
     setSuccess('');
     setLoading(true);
 
@@ -24,7 +24,12 @@ const Register = () => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data || 'Registration failed. Please try again.');
+      const errorData = err.response?.data;
+      if (typeof errorData === 'object') {
+        setErrors(errorData);
+      } else {
+        setErrors({ general: errorData || 'Registration failed. Please try again.' });
+      }
     } finally {
       setLoading(false);
     }
@@ -34,7 +39,7 @@ const Register = () => {
     <div style={styles.container}>
       <div style={styles.card}>
         <h2 style={styles.title}>Register</h2>
-        {error && <div style={styles.error}>{error}</div>}
+        {errors.general && <div style={styles.error}>{errors.general}</div>}
         {success && <div style={styles.success}>{success}</div>}
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.formGroup}>
@@ -45,9 +50,10 @@ const Register = () => {
               onChange={(e) => setUsername(e.target.value)}
               required
               minLength={3}
-              style={styles.input}
+              style={{...styles.input, borderColor: errors.username ? '#dc3545' : '#ddd'}}
               placeholder="Enter your username (min 3 characters)"
             />
+            {errors.username && <div style={styles.fieldError}>{errors.username}</div>}
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>Email</label>
@@ -56,9 +62,10 @@ const Register = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              style={styles.input}
+              style={{...styles.input, borderColor: errors.email ? '#dc3545' : '#ddd'}}
               placeholder="Enter your email"
             />
+            {errors.email && <div style={styles.fieldError}>{errors.email}</div>}
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>Password</label>
@@ -145,6 +152,14 @@ const styles = {
     borderRadius: '4px',
     marginBottom: '20px',
     textAlign: 'center'
+  },
+  fieldError: {
+    backgroundColor: '#f8d7da',
+    color: '#721c24',
+    padding: '8px',
+    borderRadius: '4px',
+    marginTop: '6px',
+    fontSize: '14px'
   },
   success: {
     backgroundColor: '#d4edda',
