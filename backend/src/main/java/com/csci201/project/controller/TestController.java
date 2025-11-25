@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -22,5 +25,7 @@ public class TestController {
     public ResponseEntity<String> protectedEndpoint() {
         return ResponseEntity.ok("This is a protected endpoint. You are authenticated!");
     }
+
+    
 }
 

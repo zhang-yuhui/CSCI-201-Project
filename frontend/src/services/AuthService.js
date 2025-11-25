@@ -41,6 +41,9 @@ class AuthService {
       return {};
     }
   }
+  isLoggedIn() {
+    return JSON.parse(localStorage.getItem('user')) !== null;
+  }
 }
 
 export default new AuthService();

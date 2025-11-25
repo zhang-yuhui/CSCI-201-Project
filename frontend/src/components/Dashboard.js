@@ -6,11 +6,17 @@ import axios from 'axios';
 const Dashboard = () => {
   const navigate = useNavigate();
   const currentUser = AuthService.getCurrentUser();
+  const isLoggedIn = AuthService.isLoggedIn();
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleLogout = () => {
     AuthService.logout();
+    navigate('/login');
+  };
+
+  const handleLogin = () => {
     navigate('/login');
   };
 
@@ -21,9 +27,11 @@ const Dashboard = () => {
       const response = await axios.get('http://localhost:8080/api/test/protected', {
         headers: AuthService.getAuthHeader()
       });
-      setMessage(response.data);
+      setMessage("success: " + response.data);
+      setSuccess(true);
     } catch (error) {
       setMessage('Error: ' + (error.response?.data?.message || 'Failed to access protected endpoint'));
+      setSuccess(false);
     } finally {
       setLoading(false);
     }
@@ -33,9 +41,11 @@ const Dashboard = () => {
     setMessage('');
     try {
       const response = await axios.get('http://localhost:8080/api/test/public');
-      setMessage(response.data);
+      setMessage("success: " + response.data);
+      setSuccess(true);
     } catch (error) {
       setMessage('Error: ' + (error.response?.data?.message || 'Failed to access public endpoint'));
+      setSuccess(false);
     } finally {
       setLoading(false);
     }
@@ -45,8 +55,8 @@ const Dashboard = () => {
     <div style={styles.container}>
       <div style={styles.card}>
         <h2 style={styles.title}>Dashboard</h2>
-        <p style={styles.welcome}>Welcome, {currentUser?.username}!</p>
-        <p style={styles.info}>You are successfully authenticated.</p>
+        <p style={styles.welcome}>Welcome, {isLoggedIn ? currentUser?.username : 'guest'}!</p>
+        <p style={styles.info}>{isLoggedIn ? 'You are successfully authenticated.' : 'You are not authenticated.'}</p>
         
         <div style={styles.buttonGroup}>
           <button onClick={testProtectedEndpoint} disabled={loading} style={styles.button}>
@@ -55,13 +65,13 @@ const Dashboard = () => {
           <button onClick={testPublicEndpoint} disabled={loading} style={styles.button}>
             {loading ? 'Testing...' : 'Test Public Endpoint'}
           </button>
-          <button onClick={handleLogout} style={styles.logoutButton}>
-            Logout
+          <button onClick={isLoggedIn ? handleLogout : handleLogin} style={styles.logoutButton}>
+            {isLoggedIn ? 'Logout' : 'Login'}
           </button>
         </div>
 
         {message && (
-          <div style={styles.message}>
+          <div style={success ? styles.message_success : styles.message_error}>
             {message}
           </div>
         )}
@@ -128,11 +138,19 @@ const styles = {
     fontSize: '16px',
     cursor: 'pointer'
   },
-  message: {
+  message_success: {
     marginTop: '20px',
     padding: '12px',
     backgroundColor: '#d4edda',
     color: '#155724',
+    borderRadius: '4px',
+    textAlign: 'center'
+  },
+  message_error: {
+    marginTop: '20px',
+    padding: '12px',
+    backgroundColor: '#f8d7da',
+    color: '#721c24',
     borderRadius: '4px',
     textAlign: 'center'
   }
