@@ -42,7 +42,9 @@ const MapWithMarker = () => {
             <Popup>
               <strong>{cafe.name}</strong><br />
               {cafe.address}<br />
-              ⭐ {cafe.overall_rating}<br />
+              ⭐ {cafe.overallRating}<br />
+              {"$".repeat(cafe.price)}<br />
+              Tags: {cafe.tags}<br />
               <em>{cafe.aiSummary}</em>
             </Popup>
           </Marker>

@@ -299,7 +299,7 @@ const CafeMap = () => {
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#888", marginTop: "0.35rem" }}>
                   <span>1 mi</span>
                   <span>10 mi</span>
-                </div>0
+                </div>
               </div>
             </div>
           </div>

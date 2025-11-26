@@ -45,6 +45,6 @@ VALUES
 -- ============================================
 INSERT INTO cafes (name, address, latitude, longitude, price, user_id, overall_rating, tags, ai_summary)
 VALUES
-('Blue Bottle Coffee', '300 S Broadway, Los Angeles, CA', 34.0451, -118.2517, 4, 1, 4.6, 'coffee,study', 'Bright space with excellent espresso.'),
-('Maru Coffee', '1936 Hillhurst Ave, Los Angeles, CA', 34.1053, -118.2871, 3, 1, 4.8, 'matcha,quiet', 'Famous for premium matcha drinks.'),
-('Urth Caffé', '451 S Hewitt St, Los Angeles, CA', 34.0466, -118.2361, 3, 2, 4.2, 'organic,breakfast', 'Popular organic cafe with great desserts.');
+('Blue Bottle Coffee', '300 S Broadway, Los Angeles, CA', 34.0451, -118.2517, 1, 1, 4.6, 'bathrooms,outlets', 'Bright space with excellent espresso.'),
+('Maru Coffee', '1936 Hillhurst Ave, Los Angeles, CA', 34.1053, -118.2871, 2, 1, 4.8, 'metro-friendly,wifi', 'Famous for premium matcha drinks.'),
+('Urth Caffé', '451 S Hewitt St, Los Angeles, CA', 34.0466, -118.2361, 3, 2, 4.2, 'bathrooms,wifi,outlets', 'Popular organic cafe with great desserts.');
