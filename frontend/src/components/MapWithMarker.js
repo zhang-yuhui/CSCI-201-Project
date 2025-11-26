@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix for default marker icons in React-Leaflet
+// Fix for default Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -12,29 +12,41 @@ L.Icon.Default.mergeOptions({
 });
 
 const MapWithMarker = () => {
-  const position = [34.0522, -118.2437]; // Los Angeles coordinates
-  
-  console.log('MapWithMarker component rendering');
+  const [cafes, setCafes] = useState([]);
+  const center = [34.0522, -118.2437]; // Los Angeles
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/cafes')
+      .then(res => res.json())
+      .then(data => {
+        console.log("Fetched cafes:", data);
+        setCafes(data);
+      })
+      .catch(err => console.error("Error fetching cafes:", err));
+  }, []);
 
   return (
     <div style={styles.container}>
-      <MapContainer
-        center={position}
-        zoom={13}
-        style={styles.map}
-        scrollWheelZoom={false}
-      >
+      <MapContainer center={center} zoom={13} style={styles.map}>
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; OpenStreetMap contributors'
         />
-        
-        <Marker position={position}>
-          <Popup>
-            <strong>Los Angeles</strong>
-            <p>Downtown LA</p>
-          </Popup>
-        </Marker>
+
+        {/* One marker per café */}
+        {cafes.map(cafe => (
+          <Marker
+            key={cafe.cafeId}
+            position={[cafe.latitude, cafe.longitude]}
+          >
+            <Popup>
+              <strong>{cafe.name}</strong><br />
+              {cafe.address}<br />
+              ⭐ {cafe.overall_rating}<br />
+              <em>{cafe.aiSummary}</em>
+            </Popup>
+          </Marker>
+        ))}`
       </MapContainer>
     </div>
   );
@@ -42,7 +54,7 @@ const MapWithMarker = () => {
 
 const styles = {
   container: {
-    height: '100%',
+    height: '100vh',
     width: '100%',
     position: 'relative',
     zIndex: 1
