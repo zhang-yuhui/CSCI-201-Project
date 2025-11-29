@@ -40,4 +40,7 @@ public class Cafe {
     public double getOverallRating() { return overallRating; }
     public String getTags() { return tags; }
     public String getAiSummary() { return aiSummary; }
+
+    // Setter for overallRating (used for updating average from reviews)
+    public void setOverallRating(double overallRating) { this.overallRating = overallRating; }
 }

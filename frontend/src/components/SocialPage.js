@@ -28,10 +28,9 @@ const SocialPage = () => {
     const header = AuthService.getAuthHeader();
     
     try {
-      // Fetch cafes and sort by rating for "Trending"
-      const cafesRes = await axios.get('http://localhost:8080/api/cafes');
-      const sorted = cafesRes.data.sort((a, b) => b.overallRating - a.overallRating).slice(0, 10);
-      setTrendingCafes(sorted);
+      // Fetch cafes, filter rating > 4.0, and sort by rating for "Trending"
+      const cafesRes = await axios.get('http://localhost:8080/api/cafes/trending');
+      setTrendingCafes(cafesRes.data || []);
 
       // Fetch friends
       const friendsRes = await axios.get('http://localhost:8080/api/users/friends', { headers: header });
@@ -321,8 +320,9 @@ const styles = {
   container: { 
     padding: '20px', 
     backgroundColor: '#f8f5f2', 
-    minHeight: 'calc(100vh - 60px)', 
-    position: 'relative' 
+    height: 'calc(100vh - 60px)', 
+    position: 'relative',
+    overflow: 'hidden'
   },
   loadingContainer: {
     display: 'flex',
@@ -398,7 +398,7 @@ const styles = {
     maxWidth: '1200px',
     margin: '0 auto',
     alignItems: 'stretch',
-    minHeight: 'calc(100vh - 120px)'
+    height: 'calc(100vh - 100px)'
   },
   leftCol: { 
     flex: '1', 
@@ -443,24 +443,24 @@ const styles = {
   profileCard: {
     backgroundColor: '#6F4E37', 
     color: 'white', 
-    padding: '30px', 
+    padding: '20px', 
     borderRadius: '15px',
     textAlign: 'center', 
-    marginBottom: '20px',
+    marginBottom: '15px',
     boxShadow: '0 4px 15px rgba(111, 78, 55, 0.3)'
   },
   avatarCircle: {
-    width: '80px', 
-    height: '80px', 
+    width: '60px', 
+    height: '60px', 
     borderRadius: '50%', 
     backgroundColor: 'white',
     color: '#6F4E37', 
-    fontSize: '32px', 
+    fontSize: '24px', 
     fontWeight: 'bold',
     display: 'flex', 
     alignItems: 'center',
     justifyContent: 'center', 
-    margin: '0 auto 15px'
+    margin: '0 auto 10px'
   },
   editProfileBtn: {
     backgroundColor: 'white', 
@@ -506,11 +506,11 @@ const styles = {
   },
   cafeCard: {
     backgroundColor: 'white', 
-    padding: '20px', 
-    borderRadius: '12px', 
-    marginBottom: '15px',
-    borderLeft: '5px solid #6F4E37', 
-    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+    padding: '15px', 
+    borderRadius: '10px', 
+    marginBottom: '10px',
+    borderLeft: '4px solid #6F4E37', 
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
     transition: 'transform 0.2s'
   },
   cafeHeader: {
