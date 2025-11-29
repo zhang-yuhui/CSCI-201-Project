@@ -42,6 +42,16 @@ const Navbar = () => {
               Map
             </Link>
           </li>
+          {isAuthenticated && (
+            <li className="navbar-item">
+              <Link 
+                to="/social" 
+                className={`navbar-link ${location.pathname === '/social' || location.pathname === '/profile/edit' ? 'active' : ''}`}
+              >
+                Social
+              </Link>
+            </li>
+          )}
           {!isAuthenticated ? (
             <>
               <li className="navbar-item">

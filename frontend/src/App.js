@@ -8,6 +8,8 @@ import Dashboard from './components/Dashboard';
 import CafeMap from './components/CafeMap'; 
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
+import SocialPage from './components/SocialPage';
+import EditProfile from './components/EditProfile';
 import './App.css';
 
 function App() {
@@ -23,6 +25,22 @@ function App() {
           element={
               <Dashboard />
           }
+        />
+        <Route 
+          path="/social" 
+          element={
+            <ProtectedRoute>
+              <SocialPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/profile/edit" 
+          element={
+            <ProtectedRoute>
+              <EditProfile />
+            </ProtectedRoute>
+          } 
         />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
