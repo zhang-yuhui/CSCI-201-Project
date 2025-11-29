@@ -30,7 +30,7 @@ const SocialPage = () => {
     try {
       // Fetch cafes and sort by rating for "Trending"
       const cafesRes = await axios.get('http://localhost:8080/api/cafes');
-      const sorted = cafesRes.data.sort((a, b) => b.overallRating - a.overallRating).slice(0, 5);
+      const sorted = cafesRes.data.sort((a, b) => b.overallRating - a.overallRating).slice(0, 10);
       setTrendingCafes(sorted);
 
       // Fetch friends
@@ -276,11 +276,15 @@ const SocialPage = () => {
 
         {/* Right Column: Trending Cafes */}
         <div style={styles.rightCol}>
-          <h3 style={{ marginTop: 0 }}>🔥 Trending Cafes</h3>
+          <div style={styles.trendingHeader}>
+            <h3 style={{ margin: 0 }}>🔥 Trending Cafes</h3>
+            <span style={styles.cafeCount}>{trendingCafes.length} cafes</span>
+          </div>
           {trendingCafes.length === 0 ? (
             <p style={{ color: '#888' }}>No cafes found.</p>
           ) : (
-            trendingCafes.map((cafe, index) => (
+            <div style={styles.scrollableList}>
+            {trendingCafes.map((cafe, index) => (
               <div key={cafe.cafeId} style={styles.cafeCard}>
                 <div style={styles.cafeHeader}>
                   <div style={styles.cafeRank}>#{index + 1}</div>
@@ -304,7 +308,8 @@ const SocialPage = () => {
                   <p style={styles.cafeSummary}>{cafe.aiSummary}</p>
                 )}
               </div>
-            ))
+            ))}
+            </div>
           )}
         </div>
       </div>
@@ -390,18 +395,50 @@ const styles = {
   grid: { 
     display: 'flex', 
     gap: '30px', 
-    flexWrap: 'wrap',
     maxWidth: '1200px',
-    margin: '0 auto'
+    margin: '0 auto',
+    alignItems: 'stretch',
+    minHeight: 'calc(100vh - 120px)'
   },
   leftCol: { 
     flex: '1', 
     minWidth: '300px',
-    maxWidth: '400px'
+    maxWidth: '400px',
+    display: 'flex',
+    flexDirection: 'column'
   },
   rightCol: { 
     flex: '1.5', 
-    minWidth: '350px' 
+    minWidth: '350px',
+    backgroundColor: 'white',
+    borderRadius: '15px',
+    padding: '20px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  trendingHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '15px',
+    paddingBottom: '10px',
+    borderBottom: '1px solid #eee'
+  },
+  cafeCount: {
+    backgroundColor: '#f0e6db',
+    color: '#6F4E37',
+    padding: '4px 12px',
+    borderRadius: '12px',
+    fontSize: '0.85rem',
+    fontWeight: '500'
+  },
+  scrollableList: {
+    flex: 1,
+    overflowY: 'auto',
+    paddingRight: '10px',
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#6F4E37 #f0e6db'
   },
   profileCard: {
     backgroundColor: '#6F4E37', 
@@ -448,7 +485,11 @@ const styles = {
     backgroundColor: 'white', 
     padding: '20px', 
     borderRadius: '15px', 
-    boxShadow: '0 2px 10px rgba(0,0,0,0.05)' 
+    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden'
   },
   sectionHeader: {
     display: 'flex', 
@@ -564,7 +605,11 @@ const styles = {
   list: { 
     listStyle: 'none', 
     padding: 0,
-    margin: 0
+    margin: 0,
+    flex: 1,
+    overflowY: 'auto',
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#6F4E37 #f0e6db'
   },
   listItem: { 
     padding: '12px', 
