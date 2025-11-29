@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import SocialPage from './components/SocialPage';
 import EditProfile from './components/EditProfile';
+import FriendProfile from './components/FriendProfile';
 import './App.css';
 
 function App() {
@@ -39,6 +40,14 @@ function App() {
           element={
             <ProtectedRoute>
               <EditProfile />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/friend/:friendId" 
+          element={
+            <ProtectedRoute>
+              <FriendProfile />
             </ProtectedRoute>
           } 
         />

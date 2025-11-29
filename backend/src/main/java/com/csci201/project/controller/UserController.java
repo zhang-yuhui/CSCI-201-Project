@@ -1,7 +1,9 @@
 package com.csci201.project.controller;
 
 import com.csci201.project.dto.UserDTO;
+import com.csci201.project.model.Review;
 import com.csci201.project.model.User;
+import com.csci201.project.repository.ReviewRepository;
 import com.csci201.project.repository.UserRepository;
 import com.csci201.project.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class UserController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     /**
      * Search for users by username (case-insensitive, partial match)
@@ -202,6 +207,47 @@ public class UserController {
             return ResponseEntity.ok(new UserDTO(currentUser.getId(), currentUser.getUsername(), currentUser.getEmail()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(createErrorResponse("Failed to get profile: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Get a specific user's profile with their cafe reviews
+     * Used for viewing friend profiles
+     */
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<?> getUserProfile(@PathVariable Long userId) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElse(null);
+
+            if (user == null) {
+                return ResponseEntity.badRequest().body(createErrorResponse("User not found"));
+            }
+
+            // Get user's reviews with cafe info
+            List<Review> userReviews = reviewRepository.findByUserId(userId);
+            
+            List<Map<String, Object>> reviewsWithCafeInfo = userReviews.stream()
+                    .map(review -> {
+                        Map<String, Object> reviewMap = new HashMap<>();
+                        reviewMap.put("id", review.getId());
+                        reviewMap.put("rating", review.getRating());
+                        reviewMap.put("comment", review.getComment());
+                        reviewMap.put("createdAt", review.getCreatedAt());
+                        reviewMap.put("cafeName", review.getCafe().getName());
+                        reviewMap.put("cafeAddress", review.getCafe().getAddress());
+                        reviewMap.put("cafeId", review.getCafe().getCafeId());
+                        return reviewMap;
+                    })
+                    .collect(Collectors.toList());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user", new UserDTO(user.getId(), user.getUsername(), user.getEmail()));
+            response.put("reviews", reviewsWithCafeInfo);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(createErrorResponse("Failed to get user profile: " + e.getMessage()));
         }
     }
 

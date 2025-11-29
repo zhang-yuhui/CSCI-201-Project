@@ -250,18 +250,25 @@ const SocialPage = () => {
               <ul style={styles.list}>
                 {friends.map(f => (
                   <li key={f.id} style={styles.friendItem}>
-                    <div style={styles.friendInfo}>
+                    <div 
+                      style={styles.friendInfoClickable}
+                      onClick={() => navigate(`/friend/${f.id}`)}
+                      title="View profile"
+                    >
                       <div style={styles.friendAvatar}>
                         {f.username.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <span style={{ fontWeight: 'bold' }}>{f.username}</span>
+                        <span style={styles.friendName}>{f.username}</span>
                         <span style={{ display: 'block', fontSize: '0.8rem', color: '#888' }}>{f.email}</span>
                       </div>
                     </div>
                     <button 
                       style={styles.removeFriendBtn} 
-                      onClick={() => removeFriend(f.id, f.username)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFriend(f.id, f.username);
+                      }}
                       title="Remove friend"
                     >
                       ✕
@@ -629,6 +636,20 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px'
+  },
+  friendInfoClickable: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    cursor: 'pointer',
+    flex: 1,
+    padding: '5px',
+    borderRadius: '8px',
+    transition: 'background-color 0.2s'
+  },
+  friendName: {
+    fontWeight: 'bold',
+    color: '#6F4E37'
   },
   friendAvatar: {
     width: '40px',
