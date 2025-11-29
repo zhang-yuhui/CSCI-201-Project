@@ -62,8 +62,13 @@ const EditProfile = () => {
             );
             
             if (res.data.success) {
-                // Update local storage with new username
-                const updatedUser = { ...currentUser, username: res.data.newUsername || username.trim() };
+                // Update local storage with new username AND new token
+                const updatedUser = { 
+                    ...currentUser, 
+                    username: res.data.newUsername || username.trim(),
+                    // Update the token if a new one was returned (username changed)
+                    ...(res.data.token && { token: res.data.token })
+                };
                 localStorage.setItem('user', JSON.stringify(updatedUser));
                 
                 setSuccess(res.data.message || "Profile updated successfully!");

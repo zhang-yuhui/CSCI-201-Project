@@ -3,6 +3,7 @@ package com.csci201.project.controller;
 import com.csci201.project.dto.UserDTO;
 import com.csci201.project.model.User;
 import com.csci201.project.repository.UserRepository;
+import com.csci201.project.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +21,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtils jwtUtils;
 
     /**
      * Search for users by username (case-insensitive, partial match)
@@ -171,10 +175,14 @@ public class UserController {
             currentUser.setUsername(newUsername);
             userRepository.save(currentUser);
 
+            // Generate a new JWT token with the new username
+            String newToken = jwtUtils.generateToken(newUsername);
+
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Username successfully updated to '" + newUsername + "'",
-                "newUsername", newUsername
+                "newUsername", newUsername,
+                "token", newToken
             ));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(createErrorResponse("Failed to update profile: " + e.getMessage()));
