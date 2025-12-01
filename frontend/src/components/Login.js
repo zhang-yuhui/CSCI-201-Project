@@ -57,8 +57,6 @@ const Login = () => {
             placeholder="********"
           />
 
-          <a href="#" style={styles.forgot}>Forgot password?</a>
-
           <button type="submit" disabled={loading} style={styles.button}>
             {loading ? 'Logging in...' : 'Sign In'}
           </button>
