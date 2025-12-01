@@ -4,17 +4,70 @@ import AuthService from '../services/AuthService';
 
 const Register = () => {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors]     = useState({});
+  const [success, setSuccess]   = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
     setSuccess('');
+
+    // --- Frontend validation ---
+    const newErrors = {};
+
+    // Username: min 3 chars, only letters/numbers/underscore
+    if (!username || username.trim().length < 3) {
+      newErrors.username = 'Username must be at least 3 characters.';
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      newErrors.username =
+        'Username can only contain letters, numbers, or underscores.';
+    }
+
+    // Simple email validation
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      newErrors.email = 'Please enter a valid email address.';
+    }
+
+    // Password validation: 6+ chars, uppercase, lowercase, number, special char
+    const passwordErrors = [];
+    if (password.length < 6) {
+      passwordErrors.push('at least 6 characters');
+    }
+    if (!/[A-Z]/.test(password)) {
+      passwordErrors.push('one uppercase letter');
+    }
+    if (!/[a-z]/.test(password)) {
+      passwordErrors.push('one lowercase letter');
+    }
+    if (!/[0-9]/.test(password)) {
+      passwordErrors.push('one number');
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      passwordErrors.push('one special character');
+    }
+
+    if (passwordErrors.length > 0) {
+      newErrors.password =
+        'Password must contain ' + passwordErrors.join(', ') + '.';
+    }
+
+    // Confirm password check
+    if (confirmPassword !== password) {
+      newErrors.confirmPassword = 'Passwords do not match.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -45,7 +98,6 @@ const Register = () => {
         {success && <div style={styles.success}>{success}</div>}
 
         <form onSubmit={handleSubmit} style={styles.form}>
-
           {/* USERNAME */}
           <div style={styles.formGroup}>
             <label style={styles.label}>Username</label>
@@ -88,20 +140,48 @@ const Register = () => {
           {/* PASSWORD */}
           <div style={styles.formGroup}>
             <label style={styles.label}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              style={{
-                ...styles.input,
-                borderColor: errors.password ? '#c0392b' : '#e0e0e0',
-              }}
-              placeholder="At least 6 characters"
-            />
+            <div style={styles.passwordWrapper}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                style={{
+                  ...styles.input,
+                  borderColor: errors.password ? '#c0392b' : '#e0e0e0',
+                }}
+                placeholder="At least 6 characters"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={styles.showPasswordBtn}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
             {errors.password && (
               <div style={styles.fieldError}>{errors.password}</div>
+            )}
+          </div>
+
+          {/* CONFIRM PASSWORD */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Confirm Password</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              style={{
+                ...styles.input,
+                borderColor: errors.confirmPassword ? '#c0392b' : '#e0e0e0',
+              }}
+              placeholder="Re-enter your password"
+            />
+            {errors.confirmPassword && (
+              <div style={styles.fieldError}>{errors.confirmPassword}</div>
             )}
           </div>
 
@@ -122,7 +202,7 @@ const Register = () => {
   );
 };
 
-// ============ STYLES (styled to match your screenshot) ============
+// ============ STYLES (Cindy's UI + your extras blended) ============
 const styles = {
   container: {
     minHeight: '100vh',
@@ -174,6 +254,21 @@ const styles = {
     fontSize: '15px',
     outline: 'none',
     transition: '0.2s',
+  },
+  passwordWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  showPasswordBtn: {
+    padding: '8px 10px',
+    borderRadius: '10px',
+    border: '1px solid #e0e0e0',
+    backgroundColor: '#f5f0ea',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#6a4d33',
   },
   button: {
     width: '100%',

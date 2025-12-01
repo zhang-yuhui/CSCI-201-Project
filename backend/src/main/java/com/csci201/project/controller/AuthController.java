@@ -48,6 +48,14 @@ public class AuthController {
             errors.put("email", "Email is already in use!");
         }
 
+        String password = registerRequest.getPassword();
+        if (!isStrongPassword(password)) {
+            errors.put(
+                    "password",
+                    "Password must be at least 6 characters and include at least one uppercase letter, one lowercase letter, one number, and one special character."
+            );
+        }
+
         if (!errors.isEmpty()) {
             return ResponseEntity.badRequest().body(errors);
         }
@@ -90,5 +98,13 @@ public class AuthController {
     public ResponseEntity<String> test() {
         return ResponseEntity.ok("Authentication endpoint is working!");
     }
-}
 
+    private boolean isStrongPassword(String password) {
+        if (password == null) {
+            return false;
+        }
+        // At least 6 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character
+        String pattern = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{6,}$";
+        return password.matches(pattern);
+    }
+}
