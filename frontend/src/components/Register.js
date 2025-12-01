@@ -61,13 +61,8 @@ const Register = () => {
       newErrors.confirmPassword = 'Passwords do not match.';
     }
 
-    // If any frontend validation errors, show banner like Login + field errors
+    // If any frontend validation errors, show on field errors
     if (Object.keys(newErrors).length > 0) {
-      const fieldMessages = Object.entries(newErrors)
-        .filter(([key]) => key !== 'general')
-        .map(([, msg]) => msg);
-      newErrors.general = fieldMessages.join(' ');
-
       setErrors(newErrors);
       return;
     }
@@ -78,7 +73,8 @@ const Register = () => {
       await AuthService.register(username, email, password);
       setSuccess('Registration successful! Redirecting...');
       setErrors({});
-      setTimeout(() => navigate('/login'), 1800);
+      await AuthService.login(username, password);
+      setTimeout(() => navigate('/dashboard'), 1800);
     } catch (err) {
       const errorData = err.response?.data;
       if (typeof errorData === 'object' && errorData !== null) {
@@ -156,9 +152,12 @@ const Register = () => {
               style={{
                 ...styles.input,
                 borderColor: errors.password ? '#c0392b' : '#ccc',
+                marginBottom: '0px',
+                flex: 1,
               }}
               placeholder="At least 6 characters"
             />
+
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -267,18 +266,23 @@ const styles = {
 
   passwordWrapper: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
     gap: '8px',
     marginBottom: '15px',
   },
 
   showPasswordBtn: {
-    padding: '8px 10px',
+    alignSelf: 'center',
+    paddingTop: '12px',
+    paddingBottom: '12px',
     borderRadius: '8px',
     border: '1px solid #ccc',
     backgroundColor: '#f1f1f1',
     cursor: 'pointer',
-    fontSize: '13px',
+    fontSize: '15px',
+    textAlign: 'center',
+    width: '60px',
   },
 
   button: {
