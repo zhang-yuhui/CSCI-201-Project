@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 
 const Register = () => {
@@ -19,10 +19,9 @@ const Register = () => {
     setErrors({});
     setSuccess('');
 
-    // --- Frontend validation ---
     const newErrors = {};
 
-    // Username: min 3 chars, only letters/numbers/underscore
+    // Username validation
     if (!username || username.trim().length < 3) {
       newErrors.username = 'Username must be at least 3 characters.';
     } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
@@ -30,12 +29,12 @@ const Register = () => {
         'Username can only contain letters, numbers, or underscores.';
     }
 
-    // Simple email validation
+    // Email validation
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
       newErrors.email = 'Please enter a valid email address.';
     }
 
-    // Password validation: 6+ chars, uppercase, lowercase, number, special char
+    // Password validation
     const passwordErrors = [];
     if (password.length < 6) {
       passwordErrors.push('at least 6 characters');
@@ -52,18 +51,23 @@ const Register = () => {
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
       passwordErrors.push('one special character');
     }
-
     if (passwordErrors.length > 0) {
       newErrors.password =
         'Password must contain ' + passwordErrors.join(', ') + '.';
     }
 
-    // Confirm password check
+    // Confirm password
     if (confirmPassword !== password) {
       newErrors.confirmPassword = 'Passwords do not match.';
     }
 
+    // If any frontend validation errors, show banner like Login + field errors
     if (Object.keys(newErrors).length > 0) {
+      const fieldMessages = Object.entries(newErrors)
+        .filter(([key]) => key !== 'general')
+        .map(([, msg]) => msg);
+      newErrors.general = fieldMessages.join(' ');
+
       setErrors(newErrors);
       return;
     }
@@ -73,11 +77,22 @@ const Register = () => {
     try {
       await AuthService.register(username, email, password);
       setSuccess('Registration successful! Redirecting...');
+      setErrors({});
       setTimeout(() => navigate('/login'), 1800);
     } catch (err) {
       const errorData = err.response?.data;
       if (typeof errorData === 'object' && errorData !== null) {
-        setErrors(errorData);
+        // backend might send field errors — also mirror into .general
+        const backendErrors = { ...errorData };
+        if (!backendErrors.general) {
+          const msgs = Object.values(backendErrors);
+          if (msgs.length > 0 && typeof msgs[0] === 'string') {
+            backendErrors.general = msgs.join(' ');
+          } else {
+            backendErrors.general = 'Registration failed. Please try again.';
+          }
+        }
+        setErrors(backendErrors);
       } else {
         setErrors({
           general: errorData || 'Registration failed. Please try again.',
@@ -98,220 +113,222 @@ const Register = () => {
         {success && <div style={styles.success}>{success}</div>}
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          {/* USERNAME */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              minLength={3}
-              style={{
-                ...styles.input,
-                borderColor: errors.username ? '#c0392b' : '#e0e0e0',
-              }}
-              placeholder="your_username"
-            />
-            {errors.username && (
-              <div style={styles.fieldError}>{errors.username}</div>
-            )}
-          </div>
+          <label style={styles.label}>Username</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            minLength={3}
+            style={{
+              ...styles.input,
+              borderColor: errors.username ? '#c0392b' : '#ccc',
+            }}
+            placeholder="your_username"
+          />
+          {errors.username && (
+            <div style={styles.fieldError}>{errors.username}</div>
+          )}
 
-          {/* EMAIL */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{
-                ...styles.input,
-                borderColor: errors.email ? '#c0392b' : '#e0e0e0',
-              }}
-              placeholder="you@example.com"
-            />
-            {errors.email && (
-              <div style={styles.fieldError}>{errors.email}</div>
-            )}
-          </div>
+          <label style={styles.label}>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{
+              ...styles.input,
+              borderColor: errors.email ? '#c0392b' : '#ccc',
+            }}
+            placeholder="you@example.com"
+          />
+          {errors.email && (
+            <div style={styles.fieldError}>{errors.email}</div>
+          )}
 
-          {/* PASSWORD */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Password</label>
-            <div style={styles.passwordWrapper}>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                style={{
-                  ...styles.input,
-                  borderColor: errors.password ? '#c0392b' : '#e0e0e0',
-                }}
-                placeholder="At least 6 characters"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={styles.showPasswordBtn}
-              >
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
-            </div>
-            {errors.password && (
-              <div style={styles.fieldError}>{errors.password}</div>
-            )}
-          </div>
-
-          {/* CONFIRM PASSWORD */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Confirm Password</label>
+          <label style={styles.label}>Password</label>
+          <div style={styles.passwordWrapper}>
             <input
               type={showPassword ? 'text' : 'password'}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               style={{
                 ...styles.input,
-                borderColor: errors.confirmPassword ? '#c0392b' : '#e0e0e0',
+                borderColor: errors.password ? '#c0392b' : '#ccc',
               }}
-              placeholder="Re-enter your password"
+              placeholder="At least 6 characters"
             />
-            {errors.confirmPassword && (
-              <div style={styles.fieldError}>{errors.confirmPassword}</div>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={styles.showPasswordBtn}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
           </div>
+          {errors.password && (
+            <div style={styles.fieldError}>{errors.password}</div>
+          )}
 
-          {/* SUBMIT */}
-          <button type="submit" disabled={loading} style={styles.button}>
+          <label style={styles.label}>Confirm Password</label>
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            style={{
+              ...styles.input,
+              borderColor: errors.confirmPassword ? '#c0392b' : '#ccc',
+            }}
+            placeholder="Re-enter your password"
+          />
+          {errors.confirmPassword && (
+            <div style={styles.fieldError}>{errors.confirmPassword}</div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={
+              loading
+                ? { ...styles.button, opacity: 0.8, cursor: 'not-allowed' }
+                : styles.button
+            }
+          >
             {loading ? 'Registering…' : 'Sign Up'}
           </button>
         </form>
 
-        <p style={styles.footerText}>
+        <p style={styles.signup}>
           Already have an account?{' '}
-          <Link to="/login" style={styles.footerLink}>
-            Sign in
-          </Link>
+          <a href="/login" style={styles.signupLink}>Sign In</a>
         </p>
       </div>
     </div>
   );
 };
 
-// ============ STYLES (Cindy's UI + your extras blended) ============
 const styles = {
   container: {
     minHeight: '100vh',
+    width: '100%',
+    background: 'linear-gradient(to bottom, #b18a60, #6d4b33)',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    background: 'linear-gradient(135deg, #704e2e, #b58b59, #d0b084)',
     padding: '20px',
   },
+
   card: {
-    width: '100%',
-    maxWidth: '420px',
     backgroundColor: 'white',
-    padding: '40px',
-    borderRadius: '18px',
-    boxShadow: '0 8px 28px rgba(0,0,0,0.15)',
+    width: '360px',
+    padding: '35px 30px',
+    borderRadius: '15px',
     textAlign: 'center',
+    boxShadow: '0px 8px 20px rgba(0,0,0,0.2)',
+    transform: 'translateX(-26px)',
   },
+
   title: {
+    margin: 0,
     fontSize: '26px',
-    fontWeight: '700',
-    marginBottom: '8px',
-    color: '#3c2e1f',
+    fontWeight: 600,
+    color: '#333',
   },
+
   subtitle: {
-    marginBottom: '30px',
-    color: '#7a6b5b',
-    fontSize: '15px',
-  },
-  form: {
-    textAlign: 'left',
-  },
-  formGroup: {
-    marginBottom: '18px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '6px',
+    marginTop: '4px',
     fontSize: '14px',
-    color: '#4a3b2f',
-    fontWeight: '600',
+    color: '#777',
   },
+
+  form: {
+    marginTop: '20px',
+    textAlign: 'left',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+
+  label: {
+    fontSize: '13px',
+    marginBottom: '6px',
+    color: '#444',
+  },
+
   input: {
-    width: '100%',
-    padding: '12px 14px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '10px',
-    backgroundColor: '#fafafa',
+    padding: '12px',
+    borderRadius: '8px',
+    border: '1px solid #ccc',
+    marginBottom: '15px',
     fontSize: '15px',
     outline: 'none',
-    transition: '0.2s',
   },
+
   passwordWrapper: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-  },
-  showPasswordBtn: {
-    padding: '8px 10px',
-    borderRadius: '10px',
-    border: '1px solid #e0e0e0',
-    backgroundColor: '#f5f0ea',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '600',
-    color: '#6a4d33',
-  },
-  button: {
-    width: '100%',
-    padding: '12px',
-    marginTop: '10px',
-    backgroundColor: '#6a4d33',
-    color: 'white',
-    fontSize: '16px',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    fontWeight: '600',
-    transition: '0.2s',
-  },
-  error: {
-    backgroundColor: '#fdecea',
-    color: '#c0392b',
-    padding: '12px',
-    borderRadius: '8px',
     marginBottom: '15px',
   },
+
+  showPasswordBtn: {
+    padding: '8px 10px',
+    borderRadius: '8px',
+    border: '1px solid #ccc',
+    backgroundColor: '#f1f1f1',
+    cursor: 'pointer',
+    fontSize: '13px',
+  },
+
+  button: {
+    padding: '12px',
+    backgroundColor: '#6d4b33',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    marginTop: '5px',
+  },
+
+  signup: {
+    marginTop: '20px',
+    fontSize: '13px',
+    color: '#777',
+  },
+
+  signupLink: {
+    color: '#6d4b33',
+    fontWeight: '600',
+    textDecoration: 'none',
+  },
+
+  error: {
+    backgroundColor: '#f8d7da',
+    color: '#721c24',
+    padding: '12px',
+    borderRadius: '4px',
+    marginBottom: '20px',
+    marginTop: '15px',
+    textAlign: 'center',
+  },
+
   fieldError: {
     color: '#c0392b',
-    fontSize: '13px',
-    marginTop: '6px',
+    fontSize: '12px',
+    marginTop: '-8px',
+    marginBottom: '10px',
   },
+
   success: {
     backgroundColor: '#e9f7ef',
     color: '#1e8449',
     padding: '12px',
-    borderRadius: '8px',
-    marginBottom: '15px',
-  },
-  footerText: {
-    marginTop: '25px',
-    color: '#7d6a56',
-    fontSize: '14px',
-  },
-  footerLink: {
-    marginLeft: '4px',
-    color: '#6a4d33',
-    fontWeight: '600',
-    textDecoration: 'none',
+    borderRadius: '4px',
+    marginTop: '15px',
+    marginBottom: '10px',
+    textAlign: 'center',
   },
 };
 

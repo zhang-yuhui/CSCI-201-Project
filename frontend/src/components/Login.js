@@ -90,7 +90,8 @@ const styles = {
     padding: '35px 30px',
     borderRadius: '15px',
     textAlign: 'center',
-    boxShadow: '0px 8px 20px rgba(0,0,0,0.2)'
+    boxShadow: '0px 8px 20px rgba(0,0,0,0.2)',
+    transform: 'translateX(-26px)'
   },
 
   icon: {
