@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Search } from "lucide-react";
 import MapWithMarker from './MapWithMarker';
 
 const mapContainerStyle = {
@@ -15,6 +15,7 @@ const mapContainerStyle = {
 
 const CafeMap = () => {
   const [searchText, setSearchText] = useState("");
+  const [activeSearchText, setActiveSearchText] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   const [filters, setFilters] = useState({
@@ -26,6 +27,9 @@ const CafeMap = () => {
     minRating: 3.5,
     maxDistance: 4,
   });
+
+  // Temporary filters that user is editing
+  const [tempFilters, setTempFilters] = useState(filters);
 
   const [cafes, setCafes] = useState([]);
 
@@ -65,7 +69,7 @@ const CafeMap = () => {
     ];
 
     const filtered = fakeData.filter((cafe) => {
-      if (searchText && !cafe.name.toLowerCase().includes(searchText.toLowerCase()))
+      if (activeSearchText && !cafe.name.toLowerCase().includes(activeSearchText.toLowerCase()))
         return false;
 
       if (filters.wifi && !cafe.wifi) return false;
@@ -79,11 +83,29 @@ const CafeMap = () => {
     });
 
     setCafes(filtered);
-  }, [filters, searchText]);
+  }, [filters, activeSearchText]);
 
   useEffect(() => {
     fetchCafes();
   }, [fetchCafes]);
+
+  // Apply filters handler
+  const handleApplyFilters = () => {
+    setFilters(tempFilters);
+    setShowFilters(false);
+  };
+
+  // Handle search button click
+  const handleSearch = () => {
+    setActiveSearchText(searchText);
+  };
+
+  // Reset temp filters when opening panel
+  useEffect(() => {
+    if (showFilters) {
+      setTempFilters(filters);
+    }
+  }, [showFilters, filters]);
 
   return (
     <div style={{ margin: 0, padding: 0, height: "100vh", display: "flex", flexDirection: "column" }}>
@@ -110,6 +132,7 @@ const CafeMap = () => {
           placeholder="Search cafes..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
           style={{
             padding: "0.75rem 1rem",
             flex: "0 0 25%",
@@ -119,6 +142,24 @@ const CafeMap = () => {
             outline: "none",
           }}
         />
+        <button
+          onClick={handleSearch}
+          style={{
+            padding: "0.75rem",
+            background: "#6B4E3D",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "48px",
+            height: "48px",
+          }}
+        >
+          <Search size={20} />
+        </button>
         <button
           onClick={() => setShowFilters(!showFilters)}
           style={{
@@ -204,16 +245,16 @@ const CafeMap = () => {
                         cursor: "pointer",
                         padding: "0.65rem 0.75rem",
                         borderRadius: "6px",
-                        border: filters[key] ? "1.5px solid #2d2d2d" : "1.5px solid #e0e0e0",
-                        background: filters[key] ? "#f5f5f5" : "white",
+                        border: tempFilters[key] ? "1.5px solid #2d2d2d" : "1.5px solid #e0e0e0",
+                        background: tempFilters[key] ? "#f5f5f5" : "white",
                         fontSize: "0.9rem",
                         transition: "all 0.2s",
                       }}
                     >
                       <input
                         type="checkbox"
-                        checked={filters[key]}
-                        onChange={() => setFilters({ ...filters, [key]: !filters[key] })}
+                        checked={tempFilters[key]}
+                        onChange={() => setTempFilters({ ...tempFilters, [key]: !tempFilters[key] })}
                         style={{
                           marginRight: "0.5rem",
                           width: "16px",
@@ -230,22 +271,21 @@ const CafeMap = () => {
               {/* Price Range */}
               <div style={{ marginBottom: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                  <strong style={{ fontSize: "0.95rem" }}>Price Range: {"$".repeat(filters.priceRange)}</strong>
+                  <strong style={{ fontSize: "0.95rem" }}>Price Range: {"$".repeat(tempFilters.priceRange)}</strong>
                 </div>
                 <input
                   type="range"
                   min="1"
                   max="3"
-                  value={filters.priceRange}
-                  onChange={(e) => setFilters({ ...filters, priceRange: Number(e.target.value) })}
+                  value={tempFilters.priceRange}
+                  onChange={(e) => setTempFilters({ ...tempFilters, priceRange: Number(e.target.value) })}
                   style={{ 
                     width: "100%", 
                     accentColor: "#2d2d2d",
                     height: "6px",
                   }}
                 />
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#6F4E37",
- marginTop: "0.35rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#6F4E37", marginTop: "0.35rem" }}>
                   <span>$</span>
                   <span>$$</span>
                   <span>$$$</span>
@@ -255,9 +295,9 @@ const CafeMap = () => {
               {/* Minimum Rating */}
               <div style={{ marginBottom: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                  <strong style={{ fontSize: "0.95rem" }}>Minimum Rating: {filters.minRating} stars</strong>
+                  <strong style={{ fontSize: "0.95rem" }}>Minimum Rating: {tempFilters.minRating} stars</strong>
                   <span style={{ fontSize: "0.85rem", color: "#888" }}>
-                    {"⭐".repeat(Math.floor(filters.minRating))}
+                    {"⭐".repeat(Math.floor(tempFilters.minRating))}
                   </span>
                 </div>
                 <input
@@ -265,8 +305,8 @@ const CafeMap = () => {
                   min="0"
                   max="5"
                   step="0.5"
-                  value={filters.minRating}
-                  onChange={(e) => setFilters({ ...filters, minRating: Number(e.target.value) })}
+                  value={tempFilters.minRating}
+                  onChange={(e) => setTempFilters({ ...tempFilters, minRating: Number(e.target.value) })}
                   style={{ 
                     width: "100%", 
                     accentColor: "#2d2d2d",
@@ -280,16 +320,16 @@ const CafeMap = () => {
               </div>
 
               {/* Distance */}
-              <div>
+              <div style={{ marginBottom: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                  <strong style={{ fontSize: "0.95rem" }}>Distance: Within {filters.maxDistance} miles</strong>
+                  <strong style={{ fontSize: "0.95rem" }}>Distance: Within {tempFilters.maxDistance} miles</strong>
                 </div>
                 <input
                   type="range"
                   min="1"
                   max="10"
-                  value={filters.maxDistance}
-                  onChange={(e) => setFilters({ ...filters, maxDistance: Number(e.target.value) })}
+                  value={tempFilters.maxDistance}
+                  onChange={(e) => setTempFilters({ ...tempFilters, maxDistance: Number(e.target.value) })}
                   style={{ 
                     width: "100%", 
                     accentColor: "#2d2d2d",
@@ -301,6 +341,27 @@ const CafeMap = () => {
                   <span>10 mi</span>
                 </div>
               </div>
+
+              {/* Apply Button */}
+              <button
+                onClick={handleApplyFilters}
+                style={{
+                  width: "100%",
+                  padding: "0.875rem",
+                  background: "#6B4E3D",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "background 0.2s",
+                }}
+                onMouseEnter={(e) => e.target.style.background = "#5a3f31"}
+                onMouseLeave={(e) => e.target.style.background = "#6B4E3D"}
+              >
+                Apply Filters
+              </button>
             </div>
           </div>
         )}
