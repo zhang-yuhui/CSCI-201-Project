@@ -230,7 +230,7 @@ public class ReviewController {
                         reviewMap.put("cafeId", review.getCafe().getCafeId());
                         return reviewMap;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
 
             return ResponseEntity.ok(Map.of("reviews", formattedReviews));
         } catch (Exception e) {
