@@ -79,9 +79,9 @@ VALUES
 ('Urth Caffé', '451 S Hewitt St, Los Angeles, CA', 34.0466, -118.2361, 3, 2, 4.2, 'bathrooms,wifi,outlets', 'Popular organic cafe with great desserts.'),
 ('Starbucks Reserve', '646 S Main St, Los Angeles, CA', 34.0445, -118.2509, 2, 3, 4.0, 'wifi,outlets', 'Premium Starbucks experience with unique roasts.'),
 ('Verve Coffee', '833 S Spring St, Los Angeles, CA', 34.0430, -118.2545, 2, 4, 4.7, 'wifi,outdoor-seating', 'Trendy spot with excellent pour-overs.'),
-('Intelligentsia Coffee', '3922 Sunset Blvd, Los Angeles, CA', 34.0908, -118.2834, 2, 1, 4.5, 'wifi,outdoor-seating,bathrooms', 'Award-winning roasts in a stylish Silver Lake location.'),
-('Alfred Coffee', '963 S Broadway, Los Angeles, CA', 34.0456, -118.2564, 3, 2, 4.3, 'instagram-worthy,wifi,outlets', 'Trendy spot known for "But First, Coffee" motto.'),
-('Philz Coffee', '801 S Hope St, Los Angeles, CA', 34.0459, -118.2592, 2, 3, 4.4, 'custom-blends,wifi,cozy', 'Personalized pour-over coffee with unique blends.');
+('Intelligentsia Coffee', '3922 Sunset Blvd, Los Angeles, CA', 34.0908, -118.2834, 2, 1, 4.5, 'wifi,bathrooms', 'Award-winning roasts in a stylish Silver Lake location.'),
+('Alfred Coffee', '963 S Broadway, Los Angeles, CA', 34.0456, -118.2564, 3, 2, 4.3, 'metro-friendly,wifi,outlets', 'Trendy spot known for "But First, Coffee" motto.'),
+('Philz Coffee', '801 S Hope St, Los Angeles, CA', 34.0459, -118.2592, 2, 3, 4.4, 'metro-friendly,wifi', 'Personalized pour-over coffee with unique blends.');
 
 -- ============================================
 -- INSERT SAMPLE REVIEWS
