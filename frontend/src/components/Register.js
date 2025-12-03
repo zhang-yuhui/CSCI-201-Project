@@ -74,7 +74,7 @@ const Register = () => {
       setSuccess('Registration successful! Redirecting...');
       setErrors({});
       await AuthService.login(username, password);
-      setTimeout(() => navigate('/dashboard'), 1800);
+      setTimeout(() => navigate('/map'), 1800);
     } catch (err) {
       const errorData = err.response?.data;
       if (typeof errorData === 'object' && errorData !== null) {

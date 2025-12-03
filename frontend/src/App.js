@@ -4,8 +4,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import MapWithMarker from './components/MapWithMarker';
 import 'leaflet/dist/leaflet.css';
-import Dashboard from './components/Dashboard';
-import CafeMap from './components/CafeMap'; 
+import CafeMap from './components/CafeMap';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import SocialPage from './components/SocialPage';
@@ -20,57 +19,43 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+
         <Route path="/map" element={<CafeMap />} />
+
+
+        <Route path="/dashboard" element={<Navigate to="/map" replace />} />
+
         <Route
-          path="/dashboard"
-          element={
-              <Dashboard />
-          }
-        />
-        <Route 
-          path="/social" 
+          path="/social"
           element={
             <ProtectedRoute>
               <SocialPage />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/profile/edit" 
+        <Route
+          path="/profile/edit"
           element={
             <ProtectedRoute>
               <EditProfile />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route 
-          path="/friend/:friendId" 
+        <Route
+          path="/friend/:friendId"
           element={
             <ProtectedRoute>
               <FriendProfile />
             </ProtectedRoute>
-          } 
+          }
         />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+        {/* Root also goes to /map now */}
+        <Route path="/" element={<Navigate to="/map" replace />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
-
-// <Router>
-    //   <Routes>
-    //     <Route path="/login" element={<Login />} />
-    //     <Route path="/register" element={<Register />} />
-    //     <Route
-    //       path="/dashboard"
-    //       element={
-    //         <ProtectedRoute>
-    //           <Dashboard />
-    //         </ProtectedRoute>
-    //       }
-    //     />
-    //     <Route path="/" element={<Navigate to="/dashboard" replace />} />
-    //   </Routes>
-    // </Router>
