@@ -22,49 +22,49 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
+        <Link to="/map" className="navbar-logo">
           Cafe Finder
         </Link>
+
         <ul className="navbar-menu">
           <li className="navbar-item">
-            <Link 
-              to="/dashboard" 
-              className={`navbar-link ${location.pathname === '/dashboard' || location.pathname === '/' ? 'active' : ''}`}
-            >
-              Dashboard
-            </Link>
-          </li>
-          <li className="navbar-item">
-            <Link 
-              to="/map" 
+            <Link
+              to="/map"
               className={`navbar-link ${location.pathname === '/map' ? 'active' : ''}`}
             >
               Map
             </Link>
           </li>
+
           {isAuthenticated && (
             <li className="navbar-item">
-              <Link 
-                to="/social" 
-                className={`navbar-link ${location.pathname === '/social' || location.pathname === '/profile/edit' ? 'active' : ''}`}
+              <Link
+                to="/social"
+                className={`navbar-link ${
+                  location.pathname === '/social' ||
+                  location.pathname === '/profile/edit'
+                    ? 'active'
+                    : ''
+                }`}
               >
                 Social
               </Link>
             </li>
           )}
+
           {!isAuthenticated ? (
             <>
               <li className="navbar-item">
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className={`navbar-link ${location.pathname === '/login' ? 'active' : ''}`}
                 >
                   Login
                 </Link>
               </li>
               <li className="navbar-item">
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className={`navbar-link ${location.pathname === '/register' ? 'active' : ''}`}
                 >
                   Register
@@ -85,4 +85,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
