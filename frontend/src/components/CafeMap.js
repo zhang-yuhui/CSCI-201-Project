@@ -23,71 +23,63 @@ const CafeMap = () => {
     bathrooms: false,
     outlets: false,
     metro: false,
-    priceRange: 2, 
-    minRating: 3.5,
-    maxDistance: 4,
+    priceRange: 3, 
+    minRating: 0,
+    maxDistance: 10,
   });
 
   // Temporary filters that user is editing
   const [tempFilters, setTempFilters] = useState(filters);
 
-  const [cafes, setCafes] = useState([]);
+  const [allCafes, setAllCafes] = useState([]);
+  const [filteredCafes, setFilteredCafes] = useState([]);
 
-  // Simulated café data
-  const fetchCafes = useCallback(() => {
-    const fakeData = [
-      {
-        id: 1,
-        name: "Bluebird Cafe",
-        rating: 4.5,
-        price: 2,
-        wifi: true,
-        bathrooms: true,
-        outlets: false,
-        metro: true,
-      },
-      {
-        id: 2,
-        name: "Java House",
-        rating: 4.0,
-        price: 1,
-        wifi: true,
-        bathrooms: false,
-        outlets: true,
-        metro: false,
-      },
-      {
-        id: 3,
-        name: "Downtown Coffee",
-        rating: 3.8,
-        price: 3,
-        wifi: true,
-        bathrooms: true,
-        outlets: true,
-        metro: true,
-      },
-    ];
+  // Fetch cafes from backend
+  useEffect(() => {
+    fetch('http://localhost:8080/api/cafes')
+      .then(res => res.json())
+      .then(data => {
+        console.log("Fetched cafes:", data);
+        setAllCafes(data);
+        setFilteredCafes(data); // Initially show all cafes
+      })
+      .catch(err => console.error("Error fetching cafes:", err));
+  }, []);
 
-    const filtered = fakeData.filter((cafe) => {
+  // Filter cafes based on search and filters
+  const filterCafes = useCallback(() => {
+    const filtered = allCafes.filter((cafe) => {
+      // Search filter
       if (activeSearchText && !cafe.name.toLowerCase().includes(activeSearchText.toLowerCase()))
         return false;
 
-      if (filters.wifi && !cafe.wifi) return false;
-      if (filters.bathrooms && !cafe.bathrooms) return false;
-      if (filters.outlets && !cafe.outlets) return false;
-      if (filters.metro && !cafe.metro) return false;
+      // Parse tags from the cafe
+      const cafeTags = cafe.tags ? cafe.tags.toLowerCase().split(',') : [];
+
+      // Amenity filters
+      if (filters.wifi && !cafeTags.includes('wifi')) return false;
+      if (filters.bathrooms && !cafeTags.includes('bathrooms')) return false;
+      if (filters.outlets && !cafeTags.includes('outlets')) return false;
+      if (filters.metro && !cafeTags.includes('metro-friendly')) return false;
+
+      // Price filter
       if (filters.priceRange < cafe.price) return false;
-      if (filters.minRating > cafe.rating) return false;
+
+      // Rating filter
+      if (filters.minRating > cafe.overallRating) return false;
+
+      // Distance filter would require calculating distance from user's location
+      // For now, we'll skip this or you can implement it with geolocation
 
       return true;
     });
 
-    setCafes(filtered);
-  }, [filters, activeSearchText]);
+    setFilteredCafes(filtered);
+  }, [allCafes, filters, activeSearchText]);
 
   useEffect(() => {
-    fetchCafes();
-  }, [fetchCafes]);
+    filterCafes();
+  }, [filterCafes]);
 
   // Apply filters handler
   const handleApplyFilters = () => {
@@ -295,10 +287,12 @@ const CafeMap = () => {
               {/* Minimum Rating */}
               <div style={{ marginBottom: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                  <strong style={{ fontSize: "0.95rem" }}>Minimum Rating: {tempFilters.minRating} stars</strong>
-                  <span style={{ fontSize: "0.85rem", color: "#888" }}>
-                    {"⭐".repeat(Math.floor(tempFilters.minRating))}
-                  </span>
+                  <strong style={{ fontSize: "0.95rem" }}>Minimum Rating: {tempFilters.minRating > 0 ? `${tempFilters.minRating} stars` : 'Any'}</strong>
+                  {tempFilters.minRating > 0 && (
+                    <span style={{ fontSize: "0.85rem", color: "#888" }}>
+                      {"⭐".repeat(Math.floor(tempFilters.minRating))}
+                    </span>
+                  )}
                 </div>
                 <input
                   type="range"
@@ -366,7 +360,7 @@ const CafeMap = () => {
           </div>
         )}
         <div style={mapContainerStyle}>
-          <MapWithMarker />
+          <MapWithMarker cafes={filteredCafes} />
         </div>
       </div>
     </div>

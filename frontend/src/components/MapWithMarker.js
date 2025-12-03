@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -11,19 +11,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const MapWithMarker = () => {
-  const [cafes, setCafes] = useState([]);
+const MapWithMarker = ({ cafes = [] }) => {
   const center = [34.0522, -118.2437]; // Los Angeles
-
-  useEffect(() => {
-    fetch('http://localhost:8080/api/cafes')
-      .then(res => res.json())
-      .then(data => {
-        console.log("Fetched cafes:", data);
-        setCafes(data);
-      })
-      .catch(err => console.error("Error fetching cafes:", err));
-  }, []);
 
   return (
     <div style={styles.container}>
@@ -48,7 +37,7 @@ const MapWithMarker = () => {
               <em>{cafe.aiSummary}</em>
             </Popup>
           </Marker>
-        ))}`
+        ))}
       </MapContainer>
     </div>
   );
