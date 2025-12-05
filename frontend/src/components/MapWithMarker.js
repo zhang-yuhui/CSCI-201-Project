@@ -13,39 +13,30 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const MapWithMarker = () => {
-    const [cafes, setCafes] = useState([]);
+const MapWithMarker = ({ cafes = [] }) => {
     const [cafeReviewCounts, setCafeReviewCounts] = useState({});
     const [selectedCafe, setSelectedCafe] = useState(null);
     const center = [34.0522, -118.2437]; // Los Angeles
 
+    // Fetch review counts whenever cafes change
     useEffect(() => {
-        fetchCafesWithReviews();
-    }, []);
-
-    const fetchCafesWithReviews = async () => {
-        try {
-            // Fetch all cafes (now returns calculated average ratings)
-            const cafesRes = await fetch('http://localhost:8080/api/cafes');
-            const cafesData = await cafesRes.json();
-            console.log("Fetched cafes:", cafesData);
-            setCafes(cafesData);
-
-            // Fetch review counts for each cafe
-            const reviewCounts = {};
-            for (const cafe of cafesData) {
-                try {
-                    const reviewRes = await axios.get(`http://localhost:8080/api/reviews/cafe/${cafe.cafeId}`);
-                    reviewCounts[cafe.cafeId] = reviewRes.data.reviewCount || 0;
-                } catch (err) {
-                    console.error(`Error fetching reviews for cafe ${cafe.cafeId}:`, err);
-                    reviewCounts[cafe.cafeId] = 0;
-                }
-            }
-            setCafeReviewCounts(reviewCounts);
-        } catch (err) {
-            console.error("Error fetching cafes:", err);
+        if (cafes.length > 0) {
+            fetchReviewCounts();
         }
+    }, [cafes]);
+
+    const fetchReviewCounts = async () => {
+        const reviewCounts = {};
+        for (const cafe of cafes) {
+            try {
+                const reviewRes = await axios.get(`http://localhost:8080/api/reviews/cafe/${cafe.cafeId}`);
+                reviewCounts[cafe.cafeId] = reviewRes.data.reviewCount || 0;
+            } catch (err) {
+                console.error(`Error fetching reviews for cafe ${cafe.cafeId}:`, err);
+                reviewCounts[cafe.cafeId] = 0;
+            }
+        }
+        setCafeReviewCounts(reviewCounts);
     };
 
     const handleMarkerClick = (cafe) => {
@@ -54,8 +45,8 @@ const MapWithMarker = () => {
 
     const handleCloseModal = () => {
         setSelectedCafe(null);
-        // Refresh cafés to get updated ratings after modal closes (in case user added a review)
-        fetchCafesWithReviews();
+        // Refresh review counts after modal closes (in case user added a review)
+        fetchReviewCounts();
     };
 
     return (
