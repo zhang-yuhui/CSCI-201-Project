@@ -64,9 +64,19 @@ public class UserController {
     @PostMapping("/add-friend/{friendId}")
     public ResponseEntity<?> addFriend(@PathVariable Long friendId) {
         try {
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            // Ensure request is authenticated
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+                return ResponseEntity.status(401).body(createErrorResponse("Not authenticated"));
+            }
+
+            String currentUsername = auth.getName();
             User currentUser = userRepository.findByUsername(currentUsername)
-                    .orElseThrow(() -> new RuntimeException("Current user not found"));
+                    .orElse(null);
+
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("Current user not found. Please log in again."));
+            }
 
             // Check if trying to add self
             if (currentUser.getId().equals(friendId)) {
@@ -100,9 +110,18 @@ public class UserController {
     @DeleteMapping("/remove-friend/{friendId}")
     public ResponseEntity<?> removeFriend(@PathVariable Long friendId) {
         try {
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+                return ResponseEntity.status(401).body(createErrorResponse("Not authenticated"));
+            }
+
+            String currentUsername = auth.getName();
             User currentUser = userRepository.findByUsername(currentUsername)
-                    .orElseThrow(() -> new RuntimeException("Current user not found"));
+                    .orElse(null);
+
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("Current user not found. Please log in again."));
+            }
 
             User friend = userRepository.findById(friendId)
                     .orElse(null);
@@ -130,9 +149,18 @@ public class UserController {
     @GetMapping("/friends")
     public ResponseEntity<?> getFriends() {
         try {
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+                return ResponseEntity.status(401).body(createErrorResponse("Not authenticated"));
+            }
+
+            String currentUsername = auth.getName();
             User currentUser = userRepository.findByUsername(currentUsername)
-                    .orElseThrow(() -> new RuntimeException("Current user not found"));
+                    .orElse(null);
+
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(createErrorResponse("Current user not found. Please log in again."));
+            }
 
             List<UserDTO> friends = currentUser.getFriends().stream()
                     .map(f -> new UserDTO(f.getId(), f.getUsername(), f.getEmail()))

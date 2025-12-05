@@ -20,6 +20,11 @@ const SocialPage = () => {
 
     // Fetch friends and trending cafes on load
     useEffect(() => {
+        // Redirect to login if not authenticated
+        if (!currentUser || !currentUser.token) {
+            navigate('/login');
+            return;
+        }
         fetchData();
     }, []);
 
@@ -27,6 +32,12 @@ const SocialPage = () => {
         setLoading(true);
         setError("");
         const header = AuthService.getAuthHeader();
+
+        // If no auth header, force re-login to avoid 401s
+        if (!header.Authorization) {
+            navigate('/login');
+            return;
+        }
 
         try {
             // Fetch cafes, filter rating > 4.0, and sort by rating for "Trending"
@@ -95,8 +106,15 @@ const SocialPage = () => {
 
     const addFriend = async (friendId, friendUsername) => {
         try {
+            const authHeader = AuthService.getAuthHeader();
+            if (!authHeader.Authorization) {
+                setActionMessage({ type: "error", text: "Please log in again." });
+                navigate('/login');
+                return;
+            }
+
             const res = await axios.post(`http://localhost:8080/api/users/add-friend/${friendId}`, {}, {
-                headers: AuthService.getAuthHeader()
+                headers: authHeader
             });
 
             if (res.data.success) {
@@ -123,8 +141,15 @@ const SocialPage = () => {
         }
 
         try {
+            const authHeader = AuthService.getAuthHeader();
+            if (!authHeader.Authorization) {
+                setActionMessage({ type: "error", text: "Please log in again." });
+                navigate('/login');
+                return;
+            }
+
             const res = await axios.delete(`http://localhost:8080/api/users/remove-friend/${friendId}`, {
-                headers: AuthService.getAuthHeader()
+                headers: authHeader
             });
 
             if (res.data.success) {
