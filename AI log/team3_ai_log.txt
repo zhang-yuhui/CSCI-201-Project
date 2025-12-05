@@ -1,0 +1,139 @@
+Team 3 Final Project AI Log
+CSCI 201 Fall 2025
+
+CafeFinder
+Team Members: Angela Zhuang, Daniel Lee, Hannah Lee, Yuhui Zhang, Manuela Berrio, Tibor Fober, Cindy Zhou, Jiayu Li
+
+Prompt
+The project is a full-stack web application with React in the frontend and Spring Boot as the backend. The goal is to create a map with markers/pins representing specific locations. Please create a React component using Leaflet, an open-source JavaScript library for interactive maps, with one marker and one marker popup. 
+
+Issues
+Nothing was displaying when navigating to the MapWithMarker page after running the web application, even after implementing the MapWithMarker component and creating a page that App.js routes to.
+
+Fix
+There was a mismatched dependency between React, React-Leaflet, and Leaflet. The specific versions of React, React-Leaflet, and Leaflet used for the application had to be React 18, React-Leaflet v4, and Leaflet v1.9.4. The JSON package file was updated to ensure that these specific versions were installed. There were no errors after this.
+
+Explanation
+It is important to ensure that each of the frameworks and libraries being used are compatible with one another. When there are mismatched dependencies, as displayed by this specific instance, there will be errors and the code will not function as intended.
+
+
+Prompt
+Based on our Cafe specifications in the documentation, as well as the SQL schema for the Cafes table, please create a SQL schema as well as a Java model class for Cafe. Please also create a Java class which connects to my SQL database, retrieves all cafe rows, and returns a list of the cafes from the database for my backend API.
+
+Issues
+The returned Cafe.java Java class and the data.sql SQL schema were great and did not have any errors. However, for the Java class which connects to the database and returns a list of cafes, ChatGPT returned a CafeDAO.java class. However, the issue was that the CafeDAO.java class did not match the existing structure of the code where there are controller, dto, model, repository, and service folders. So, I asked ChatGPT to again create code for the same purpose, but this time following the project directory structure.
+
+Fix
+ChatGPT returned the CafeController.java file for the controller folder, which allows for functions such as getting all cafes from the database, and CafeRequest.java for the dto folder, which represents the fields that would be returned when requesting a cafe from the database, Cafe.java in the model folder which is the aforementioned Cafe class, and CafeRepository.java in the repository folder and CafeService.java in the service folder. Now, the structure followed the code structure.
+
+Explanation
+This fix was important for code consistency as well as for it to be structured in a way that was easy to understand and edit for our React and Spring Boot tech stack. In the real world, there are standards to adhere when coding, especially when building upon previous code and existing practices that are optimal to follow.
+
+
+Prompt
+Please now integrate the backend with the frontend. The goal is for all of the cafes in the database appear with a marker for the frontend map, and when the user clicks on the marker on the map, information about the specific cafe including the name, address, star rating, description, etc. are displayed.
+
+Issues
+After implementing the code given by ChatGPT to do this task, some cafe marker information was not displaying on the frontend whenever a cafe marker was clicked. Also, the cafe marker information was not formatted in the desired format. For instance, for the cafe price, instead of displaying three dollar signs ($$$) if the cafe price was listed as 3 (for pricey), the information simply displayed the number 3.
+
+Fix
+The price was fixed so that there was a dollar sign displayed as many times as price was set to in the database. In addition, to fix how the cafe overall rating was not being displayed when the cafe marker was clicked, it turns out that instead of referencing cafe.cafe_id, the reference was supposed to be cafe.cafeId and similarly cafe.overall_rating was to be cafe.overallRating since the backend JSON uses camel case and not snake case.
+
+Explanation
+Once again, naming conventions and consistency is important so that errors such as these do not arise. In addition, it is important to display the entirety of the cafe information for the users, since the goal of the project is to help users find cafes to visit based off this provided cafe information. This will help us reach the project goal and make the user experience better.
+
+
+Prompt
+
+Starter code
+
+create a starter code for a web app with front end ReactJS and backend Spring boot with java 21 and MySQL DB, and I would also like a user authentification library for managing user login and making it easy. Specifically use spring security, maven and create react app. Also, write the appropriate .gitignore.
+
+Main page for testing login
+
+can you create a nav bar to route these paths? Include the dashboard and the login/out button.
+
+Issues
+
+Issues with testing protected endpoint
+
+why I test endpoint http://localhost:8080/api/test/public
+ with GET but I still get 403 in @TestController.java
+
+Issues with role vs url based filter
+
+what's the difference of filterChain in @SecurityConfig.java:
+
+.authorizeHttpRequests(auth -> auth
+.requestMatchers("/api/auth/**").permitAll()
+.requestMatchers("/api/test/public").permitAll()
+.anyRequest().authenticated()
+)
+
+and in @TestController.java (21):
+
+@PreAuthorize("hasRole('USER')")
+public ResponseEntity<String> protectedEndpoint() { ... }
+
+why both are needed, can it be simplified for cleaner code.
+
+Issues with git merge conflict
+
+After someone else updated all at the same file, merge is complicated.
+
+Fix
+
+testing protected endpoint
+
+Updating SecurityConfig.java to allow /api/test/public without authentication:
+
+.requestMatchers("/api/auth/**").permitAll()
+.requestMatchers("/api/test/public").permitAll()
+.anyRequest().authenticated()
+
+role vs url based filter
+
+Use only role-based authentication because some endpoints such as map or coffee shop are public but others (user profile, user's coffee rating) are protected.
+In SecurityConfig.java allow all the request in http filter:
+
+.requestMatchers("/api/auth/**").permitAll()
+.requestMatchers("/api/test/public").permitAll()
+.anyRequest().authenticated()
+
+Git merge conflict
+
+activate option for merge by default:
+
+cd /Users/zhangyuhui/Downloads/CSCI-201-Project && git config pull.rebase false
+cd /Users/zhangyuhui/Downloads/CSCI-201-Project && git pull origin main
+cd /Users/zhangyuhui/Downloads/CSCI-201-Project && git add frontend/src/App.js
+
+Explanation
+
+The issue is in SecurityConfig.java: only /api/auth/** is permitted, so /api/test/public requires authentication.
+
+filterChain in SecurityConfig.java
+Purpose: HTTP-level authentication (who can access).
+Runs before the request reaches the controller.
+Determines if an endpoint requires authentication.
+URL pattern–based.
+Coarse-grained: public vs authenticated.
+
+@PreAuthorize("hasRole('USER')") in TestController.java
+Purpose: Method-level authorization (what roles are allowed).
+Runs after authentication, before the method executes.
+Checks roles/permissions of the authenticated user.
+Method-level.
+Fine-grained: which roles can access.
+
+After using only role-based authentication:
+
+Request comes in → JWT filter processes it (sets authentication if token is valid)
+
+Request reaches controller → @PreAuthorize annotation checks authorization
+
+If authorized → method executes
+
+If not authorized → 403 Forbidden
+
+For the merge issue: the local branch has a commit (“43cb1bb - Finished login backend and User DB...”) that isn't on the remote, and the remote has two commits (“acd006a” and “34bc1d2” about MapWithMarker) that aren't on your local branch.
