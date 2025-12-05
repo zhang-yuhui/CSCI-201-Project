@@ -137,3 +137,29 @@ If authorized → method executes
 If not authorized → 403 Forbidden
 
 For the merge issue: the local branch has a commit (“43cb1bb - Finished login backend and User DB...”) that isn't on the remote, and the remote has two commits (“acd006a” and “34bc1d2” about MapWithMarker) that aren't on your local branch.
+
+
+Prompt
+Add an "Apply" button to the filter panel in the CafeMap component so that users can select multiple filter options (amenities, price range, rating, distance) before applying them all at once. The filters should only update the displayed cafes when the user clicks the Apply button, not immediately as they adjust each filter.
+
+Issues
+The original implementation applied filters immediately as users toggled checkboxes or adjusted sliders, which could be jarring and didn't allow users to experiment with different filter combinations before committing to them. This also meant multiple unnecessary re-renders and filter operations as users made adjustments.
+
+Fix
+Created a separate tempFilters state to track the user's current selections while they're editing in the filter panel. Added a handleApplyFilters function that copies tempFilters to the actual filters state and closes the panel when the Apply button is clicked. Updated all filter controls (checkboxes, sliders) to modify tempFilters instead of filters directly. Added a useEffect hook to reset tempFilters to match filters whenever the panel opens, ensuring users see their currently active filters.
+
+Explanation
+Separating the temporary editing state from the applied filter state provides a better user experience by allowing users to preview and adjust multiple filter options before committing. This pattern is common in filter interfaces and prevents unnecessary computation and UI updates while users are still deciding on their filter criteria. It also gives users the ability to close the panel without applying changes if they decide not to modify the filters.
+
+
+Prompt
+Integrate the CafeMap component with the MySQL database backend to fetch and filter real cafe data instead of using simulated/fake data. The cafes should be fetched from the Spring Boot API endpoint at http://localhost:8080/api/cafes and filtered based on their database fields (tags, price, overallRating) according to the user's selected filter options.
+
+Issues
+The CafeMap component was using hardcoded temporary cafe data for testing, and MapWithMarker was independently fetching all cafes from the API. This caused duplicate data fetching and prevented the filter functionality from working with real data. Additionally, the cafe data structure from the database (with comma-separated tags like "wifi,bathrooms,outlets") needed to be properly parsed to check against the filter selections.
+
+Fix
+Removed the fake data from CafeMap and added a useEffect hook to fetch real cafe data from http://localhost:8080/api/cafes on component mount. Created two state variables: allCafes to store the complete dataset and filteredCafes to store the filtered results. Updated the filterCafes function to parse the comma-separated tags string from the database and check if it includes the selected amenities. Modified MapWithMarker to accept a cafes prop instead of fetching data itself, eliminating duplicate API calls. This established a proper parent-child data flow where CafeMap fetches and filters the data, then passes only the filtered results to MapWithMarker for display.
+
+Explanation
+Separating data fetching from display logic creates a cleaner architecture with a single source of truth. By having the parent component (CafeMap) manage both the raw data and filtering logic, we ensure that the map always displays exactly what matches the current filters. This approach also makes the MapWithMarker component more reusable since it now simply displays whatever cafe data it receives as props, rather than being tightly coupled to a specific API endpoint.
