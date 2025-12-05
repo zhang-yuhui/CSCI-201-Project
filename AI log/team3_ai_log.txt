@@ -163,3 +163,15 @@ Removed the fake data from CafeMap and added a useEffect hook to fetch real cafe
 
 Explanation
 Separating data fetching from display logic creates a cleaner architecture with a single source of truth. By having the parent component (CafeMap) manage both the raw data and filtering logic, we ensure that the map always displays exactly what matches the current filters. This approach also makes the MapWithMarker component more reusable since it now simply displays whatever cafe data it receives as props, rather than being tightly coupled to a specific API endpoint.
+
+Prompt
+Provided ChatGPT with the template code for login page along with descriptions on how to style along with image from Figma. 
+
+Issue 
+Requesting help for styling pages to match better, and to fix the layout of the code. 
+
+Fix
+Was provided with working code on how to properly format the page, regarding alignment, font, and color choices. 
+
+Explanation
+Quickly add css details to the website and quickly reformat code. 
