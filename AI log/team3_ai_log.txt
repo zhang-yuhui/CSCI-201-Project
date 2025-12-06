@@ -163,3 +163,45 @@ Removed the fake data from CafeMap and added a useEffect hook to fetch real cafe
 
 Explanation
 Separating data fetching from display logic creates a cleaner architecture with a single source of truth. By having the parent component (CafeMap) manage both the raw data and filtering logic, we ensure that the map always displays exactly what matches the current filters. This approach also makes the MapWithMarker component more reusable since it now simply displays whatever cafe data it receives as props, rather than being tightly coupled to a specific API endpoint.
+
+
+Prompt
+Why can't I log in with the test user whose credentials were inserted into userinfo? The backend throws an error even though testUser with password hashed_pw_456 exists in the database.
+
+Issues
+The AI revealed multiple mismatches between the backend JPA entity (User.java) and the SQL table created in data.sql:Table name mismatch, Column name mismatch, Field mismatch,Invalid password format
+
+Fix
+To resolve the problem: Updated data.sql to create a users table matching the JPA entity structure, Renamed columns to id, username, email, password, etc., Replaced the plain-text password with a valid BCrypt hash, Inserted two working test users:
+INSERT INTO users (id, username, email, password, role)
+VALUES
+ (1, 'testuser', 'test@usc.edu', '$2a$10$QAh2Qj...',
+  'ROLE_USER'),
+ (2, 'demoUser', 'demo@example.com', '$2a$10$QAh2Qj...',
+  'ROLE_USER');
+Users can now log in using: Username: testuser, Password: testuser
+
+Explanation
+Matching your database schema to JPA entities is essential because Spring Boot relies on consistent mappings to load user records. Password hashing is equally important since Spring Security will not authenticate plain-text passwords. Fixing both issues ensures reliable authentication and prevents runtime mismatches that break login functionality.
+
+
+Prompt
+Diagnose an error where updating a user’s username caused subsequent authenticated requests to fail. The goal was to understand why the backend threw “User not found” even though the profile update succeeded.
+
+Issues
+After investigation, the problem was caused by JWT token inconsistency:
+When the username changed (e.g., from demoUser → demoUser2),
+the backend updated the database, but did not regenerate a new JWT.
+The client continued using a JWT containing the old username, so:
+SecurityContextHolder.getContext().getAuthentication().getName()
+still returned demoUser
+The backend attempted to look up a user that no longer existed
+This caused every protected endpoint to return 403 Forbidden.
+
+Fix (Correctness)
+Two coordinated fixes were applied:
+Backend Fix: After updating the user profile, the backend now: Generates a new JWT containing the new username, Sends the updated token back to the client
+Frontend Fix: After receiving the response: Replace the old stored token with the new JWT, Update the React global auth state
+
+Explanation
+JWTs are stateless, meaning they permanently store the username at creation. If the username changes and the token does not, authentication becomes inconsistent. Regenerating and updating the JWT ensures the client and backend remain synchronized, maintaining security and preventing authorization failures.
