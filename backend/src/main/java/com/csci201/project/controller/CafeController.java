@@ -6,6 +6,9 @@ import com.csci201.project.repository.ReviewRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @RestController
@@ -53,24 +56,30 @@ public class CafeController {
     public List<Cafe> getTrendingCafes() {
         List<Cafe> allCafes = cafeRepository.findAll();
 
-        // Calculate average rating from reviews for each cafe
-        for (Cafe cafe : allCafes) {
-            Double avgRating = reviewRepository.getAverageRatingByCafeId(cafe.getCafeId());
-            if (avgRating != null) {
-                // Update the overallRating with the calculated average from reviews
-                cafe.setOverallRating(avgRating);
-            } else {
-                // If no reviews, set to 0
-                cafe.setOverallRating(0.0);
-            }
-        }
+        // Compute average ratings in parallel to reduce latency with many cafes
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+        try {
+            List<CompletableFuture<Cafe>> futures = allCafes.stream()
+                    .map(cafe -> CompletableFuture.supplyAsync(() -> {
+                        Double avgRating = reviewRepository.getAverageRatingByCafeId(cafe.getCafeId());
+                        cafe.setOverallRating(avgRating != null ? avgRating : 0.0);
+                        return cafe;
+                    }, executor))
+                    .collect(Collectors.toList());
 
-        // Filter cafés with rating >= 4.0 and sort by rating descending
-        return allCafes.stream()
-                .filter(cafe -> cafe.getOverallRating() >= 4.0)
-                .sorted((a, b) -> Double.compare(b.getOverallRating(), a.getOverallRating()))
-                .limit(10)
-                .collect(Collectors.toList());
+            List<Cafe> cafesWithRatings = futures.stream()
+                    .map(CompletableFuture::join)
+                    .collect(Collectors.toList());
+
+            // Filter cafés with rating >= 4.0 and sort by rating descending
+            return cafesWithRatings.stream()
+                    .filter(cafe -> cafe.getOverallRating() >= 4.0)
+                    .sorted((a, b) -> Double.compare(b.getOverallRating(), a.getOverallRating()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+        } finally {
+            executor.shutdown();
+        }
     }
 
     /**
