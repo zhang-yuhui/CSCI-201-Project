@@ -205,3 +205,15 @@ Frontend Fix: After receiving the response: Replace the old stored token with th
 
 Explanation
 JWTs are stateless, meaning they permanently store the username at creation. If the username changes and the token does not, authentication becomes inconsistent. Regenerating and updating the JWT ensures the client and backend remain synchronized, maintaining security and preventing authorization failures.
+
+Prompt
+Provided ChatGPT with the template code for login page along with descriptions on how to style along with image from Figma. 
+
+Issue 
+Requesting help for styling pages to match better, and to fix the layout of the code. 
+
+Fix
+Was provided with working code on how to properly format the page, regarding alignment, font, and color choices. 
+
+Explanation
+Quickly add css details to the website and quickly reformat code. 
