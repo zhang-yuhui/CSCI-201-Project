@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @RestController
@@ -171,14 +174,27 @@ public class UserController {
                 return ResponseEntity.status(401).body(createErrorResponse("Current user not found. Please log in again."));
             }
 
-            List<UserDTO> friends = currentUser.getFriends().stream()
-                    .map(f -> new UserDTO(f.getId(), f.getUsername(), f.getEmail()))
-                    .collect(Collectors.toList());
+            // Fetch per-friend review counts in parallel to reduce latency
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            try {
+                List<CompletableFuture<UserDTO>> futures = currentUser.getFriends().stream()
+                        .map(friend -> CompletableFuture.supplyAsync(() -> {
+                            long reviewCount = reviewRepository.countByUserId(friend.getId());
+                            return new UserDTO(friend.getId(), friend.getUsername(), friend.getEmail(), reviewCount);
+                        }, executor))
+                        .collect(Collectors.toList());
 
-            return ResponseEntity.ok(Map.of(
-                "friends", friends,
-                "count", friends.size()
-            ));
+                List<UserDTO> friends = futures.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList());
+
+                return ResponseEntity.ok(Map.of(
+                    "friends", friends,
+                    "count", friends.size()
+                ));
+            } finally {
+                executor.shutdown();
+            }
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(createErrorResponse("Failed to get friends: " + e.getMessage()));
         }

@@ -17,6 +17,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByUserId(Long userId);
     List<Review> findByCafeCafeId(Integer cafeId);
 
+    long countByUserId(Long userId);
+
     /**
      * Calculate the average rating for a specific cafe from all reviews
      */

@@ -7,6 +7,7 @@ public class UserDTO {
     private Long id;
     private String username;
     private String email;
+    private Long reviewCount;
 
     public UserDTO() {}
 
@@ -14,6 +15,13 @@ public class UserDTO {
         this.id = id;
         this.username = username;
         this.email = email;
+    }
+
+    public UserDTO(Long id, String username, String email, Long reviewCount) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.reviewCount = reviewCount;
     }
 
     // Getters and Setters
@@ -39,5 +47,13 @@ public class UserDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Long getReviewCount() {
+        return reviewCount;
+    }
+
+    public void setReviewCount(Long reviewCount) {
+        this.reviewCount = reviewCount;
     }
 }
