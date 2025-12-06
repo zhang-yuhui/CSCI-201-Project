@@ -6,6 +6,7 @@ import com.csci201.project.dto.RegisterRequest;
 import com.csci201.project.model.User;
 import com.csci201.project.repository.UserRepository;
 import com.csci201.project.util.JwtUtils;
+import com.csci201.project.util.UserTrie;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,9 @@ public class AuthController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private UserTrie userTrie;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -67,6 +71,7 @@ public class AuthController {
         );
 
         userRepository.save(user);
+        userTrie.insert(user.getId(), user.getUsername(), user.getEmail());
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "User registered successfully!");

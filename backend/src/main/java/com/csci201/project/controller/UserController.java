@@ -6,6 +6,8 @@ import com.csci201.project.model.User;
 import com.csci201.project.repository.ReviewRepository;
 import com.csci201.project.repository.UserRepository;
 import com.csci201.project.util.JwtUtils;
+import com.csci201.project.util.UserTrie;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +32,14 @@ public class UserController {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private UserTrie userTrie;
+
+    @PostConstruct
+    public void preloadTrie() {
+        userRepository.findAll().forEach(u -> userTrie.insert(u.getId(), u.getUsername(), u.getEmail()));
+    }
+
     /**
      * Search for users by username (case-insensitive, partial match)
      * Returns UserDTO to avoid exposing passwords
@@ -41,9 +51,8 @@ public class UserController {
         }
 
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        
-        List<UserDTO> results = userRepository.findAll().stream()
-                .filter(u -> u.getUsername().toLowerCase().contains(query.toLowerCase()))
+
+        List<UserDTO> results = userTrie.searchByPrefix(query.trim()).stream()
                 .filter(u -> !u.getUsername().equals(currentUsername)) // Exclude current user
                 .map(u -> new UserDTO(u.getId(), u.getUsername(), u.getEmail()))
                 .collect(Collectors.toList());
@@ -205,8 +214,13 @@ public class UserController {
                 return ResponseEntity.badRequest().body(createErrorResponse("Username '" + newUsername + "' is already taken"));
             }
 
+            String oldUsername = currentUser.getUsername();
+
             currentUser.setUsername(newUsername);
             userRepository.save(currentUser);
+
+            userTrie.remove(oldUsername);
+            userTrie.insert(currentUser.getId(), newUsername, currentUser.getEmail());
 
             // Generate a new JWT token with the new username
             String newToken = jwtUtils.generateToken(newUsername);
